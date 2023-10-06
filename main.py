@@ -1,14 +1,16 @@
 from fastapi import FastAPI
-from db import database
+from db import database_connection
 from db import models
-from routers import ai_service
+from routers import language_processing, text_to_voice, voice_to_text
 
 app = FastAPI()
 
 
-engine = database.engine
+engine = database_connection.engine
 
 models.Base.metadata.create_all(bind=engine)
 
 
-app.include_router(ai_service.router)
+app.include_router(language_processing.router)
+app.include_router(text_to_voice.router)
+app.include_router(voice_to_text.router)
