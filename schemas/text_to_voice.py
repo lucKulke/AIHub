@@ -1,6 +1,7 @@
 from pydantic import BaseModel
-from fastapi import UploadFile
+from typing import List
 
 
 class VoiceToText(BaseModel):
     text: str
+    language: str
