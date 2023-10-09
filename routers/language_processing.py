@@ -27,10 +27,13 @@ async def chat_gpt_response(gpt_object, model, instances, token):
     response = {}
 
     for instance, data in instances.items():
+        sections = []
+
+        for section in data.sections:
+            sections.append({"role": section.role, "content": section.content})
+
         task = asyncio.create_task(
-            gpt_object.request(
-                instance, model, data["system_message"], data["sections"], token
-            )
+            gpt_object.request(instance, model, data.system_message, sections, token)
         )
         tasks.append(task)
 
