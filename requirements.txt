@@ -6,3 +6,5 @@ bcrypt
 python-jose
 python-multipart
 python-dotenv
+boto3
+pydub
