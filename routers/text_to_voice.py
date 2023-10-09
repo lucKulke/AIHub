@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 import requests
 import os
 from utilitys import azure
-from schemas.text_to_voice import VoiceToText
+from schemas.text_to_voice import TextToVoice
 from ai_services.text_to_voice import AzureVoice
 
 
@@ -12,7 +12,7 @@ router = APIRouter(prefix="/text_to_voice", tags=["Text to voice"])
 
 
 @router.post("/azure")
-def azure_voice(request: VoiceToText):
+def azure_voice(request: TextToVoice):
     azure_voice = AzureVoice()
 
     if not azure_voice.is_language_available(request.language):

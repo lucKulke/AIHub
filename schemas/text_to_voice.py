@@ -2,6 +2,6 @@ from pydantic import BaseModel
 from typing import List
 
 
-class VoiceToText(BaseModel):
+class TextToVoice(BaseModel):
     text: str
     language: str
