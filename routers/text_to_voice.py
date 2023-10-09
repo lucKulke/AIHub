@@ -1,19 +1,31 @@
 from fastapi import APIRouter, Response, HTTPException
+from fastapi.responses import JSONResponse
 import requests
 import os
-import io
-from pydub import AudioSegment
 from utilitys import azure
 from schemas.text_to_voice import VoiceToText
+from ai_services.text_to_voice import AzureVoice
+
 
 subscription_key = os.getenv("AWS_VOICE_SUBSCRIPTION_KEY")
 router = APIRouter(prefix="/text_to_voice", tags=["Text to voice"])
 
 
-@router.post("/microsoft")
-def microsoft_voices(request: VoiceToText):
+@router.post("/azure")
+def azure_voice(request: VoiceToText):
+    azure_voice = AzureVoice()
+
+    if not azure_voice.is_language_available(request.language):
+        raise HTTPException(
+            status_code=404,
+            detail=f"'{request.language}' not available. Go to /voice_to_text/azure/list for all available languages",
+        )
+
     access_token = azure.get_access_token(subscription_key=subscription_key)
-    response = azure.text_to_voice(access_token=access_token, text=request.text)
+
+    azure_voice.set_access_token(access_token)
+
+    response = azure_voice.generate_voice(text=request.text, language=request.language)
 
     if response.status_code != 200:
         HTTPException(status_code=response.status_code, detail=response.text)
@@ -28,3 +40,17 @@ def microsoft_voices(request: VoiceToText):
     # Return the audio file as a response
     return Response(content=audio_data, headers=headers)
     # Check the response status code and content
+
+
+@router.get("/azure/available_voices")
+def azure_voices():
+    return AzureVoice().list_of_available_languages()
+
+
+@router.get("/azure/speakers")
+def azure_speakers():
+    content = AzureVoice().list_of_azure_voices(subscription_key)
+    return Response(
+        content=content, headers={"Content-Type": "application/json; charset=utf-8"}
+    )
+    return AzureVoice().list_of_azure_voices(subscription_key)
