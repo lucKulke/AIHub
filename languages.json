@@ -1,0 +1,22 @@
+{
+  "de": {
+    "name": "de-DE-MajaNeural",
+    "language": "de-DE",
+    "gender": "Female"
+  },
+  "en": {
+    "name": "en-US-ChristopherNeural",
+    "language": "en-US",
+    "gender": "Male"
+  },
+  "ja": {
+    "name": "ja-JP-KeitaNeural",
+    "language": "ja-JP",
+    "gender": "Female"
+  },
+  "fr": {
+    "name": "fr-FR-DeniseNeural",
+    "language": "fr-FR",
+    "gender": "Female"
+  }
+}
