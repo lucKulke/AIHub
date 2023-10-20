@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Response, Form, UploadFile, File
 from schemas.voice_to_text import WhisperSchema
+from ai_services.voice_to_text import Whisper
 import shutil
 import os
 from utilitys import aws
 import boto3
 import uuid
 import tempfile
+import time
 
 router = APIRouter(prefix="/voice_to_text", tags=["Voice to text"])
 
@@ -14,7 +16,9 @@ os.getenv("AWS_REGION")
 
 
 @router.post("/whisper")
-def whisper_response(audio_file: UploadFile = File(...), model: str = Form(...)):
+def whisper_response(
+    audio_file: UploadFile = File(...), model: str = Form(...), only_text: bool = True
+):
     upload_directory = "./temp_audio"
     try:
         # Ensure the specified directory exists; create it if not
@@ -31,11 +35,24 @@ def whisper_response(audio_file: UploadFile = File(...), model: str = Form(...))
             with open(temp_file_path, "wb") as f:
                 f.write(audio_file.file.read())
 
-                aws.upload_file_to_s3(temp_file_path, aws_bucket, filename)
+                success = aws.upload_file_to_s3(temp_file_path, aws_bucket, filename)
+                if success:
+                    presigned_url = aws.create_presigned_url_expanded(
+                        "get_object",
+                        {"Bucket": aws_bucket, "Key": filename},
+                        http_method="GET",
+                    )
+
+                    print(presigned_url, flush=True)
+                    response = Whisper("http://localhost:8080/invocations").request(
+                        presigned_url, model
+                    )
 
         # Optionally, you can return the path of the saved file
-        return Response(
-            content=f"message : Audio file uploaded and saved to directory | filename: {filename}"
-        )
+        if only_text:
+            return response["predictions"]["segments"][0][4]
+        else:
+            return response
     except Exception as e:
+        print(f"error: {str(e)}")
         return Response(content=f"error: {str(e)}", status_code=500)
