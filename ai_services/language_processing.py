@@ -24,6 +24,7 @@ class ChatGPT:
                     "https://api.openai.com/v1/chat/completions",
                     headers=headers,
                     json=payload,
+                    timeout=30.00,
                 )
                 response.raise_for_status()  # Raise an exception if the response indicates an error
 
@@ -31,8 +32,13 @@ class ChatGPT:
             message = json_response["choices"][0]["message"]
             response_data = {instance: message}
 
+        except httpx.ReadTimeout as timeout_err:
+            response_data = {
+                instance: {"role": "error", "content": "httpx ReadTimeout error"}
+            }
+
         except httpx.HTTPError as http_err:
-            response_data = {instance: f"HTTP error: {http_err}"}
+            response_data = {instance: {"role": "error", "content": f"httpx error"}}
 
         except Exception as err:
             response_data = {instance: f"An error occurred: {err}"}
