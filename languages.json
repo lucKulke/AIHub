@@ -1,20 +1,20 @@
 {
-  "de": {
+  "German": {
     "name": "de-DE-MajaNeural",
     "language": "de-DE",
     "gender": "Female"
   },
-  "en": {
+  "English": {
     "name": "en-US-ChristopherNeural",
     "language": "en-US",
     "gender": "Male"
   },
-  "ja": {
+  "Japanese": {
     "name": "ja-JP-KeitaNeural",
     "language": "ja-JP",
     "gender": "Female"
   },
-  "fr": {
+  "France": {
     "name": "fr-FR-DeniseNeural",
     "language": "fr-FR",
     "gender": "Female"
