@@ -65,7 +65,7 @@ async def upload_to_s3(audiofile: UploadFile):
 
     print(f"s3_start: {datetime.now().strftime('%H:%M:%S')}", flush=True)
     response = await aws.upload_file_content_directly_to_s3(
-        file_like_obj, aws_bucket, key
+        file_like_obj, aws_bucket, key, audiofile.content_type
     )
     print(f"s3_end: {datetime.now().strftime('%H:%M:%S')}", flush=True)
     return response
