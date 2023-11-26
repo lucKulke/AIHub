@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Response, Form, UploadFile, File
+from fastapi import APIRouter, Response, Form, UploadFile, File, HTTPException
 from schemas.voice_to_text import WhisperSchema
 from ai_services.voice_to_text import Whisper
 import shutil
@@ -26,6 +26,18 @@ whisper = Whisper("http://localhost:8080")
 async def whisper_response(
     audiofile: UploadFile = File(...), model: str = Form(...), only_text: bool = True
 ):
+    if not audiofile.content_type in [
+        "audio/wave",
+        "audio/wav",
+        "audio/mp3",
+        "audio/ogg",
+        "audio/mpeg",
+    ]:
+        raise HTTPException(
+            status_code=400,
+            detail=f"file: {audiofile.filename} is not an audiofile! possible formats: wav, mp3, ogg, mpeg",
+        )
+
     s3_task = upload_to_s3(audiofile)
     whisper_task = send_to_whisper(audiofile, model)
 
