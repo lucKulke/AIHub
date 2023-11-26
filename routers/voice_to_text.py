@@ -13,6 +13,7 @@ import requests
 import httpx
 import typing
 import re
+import time
 
 
 router = APIRouter(prefix="/voice_to_text", tags=["Voice to text"])
@@ -63,11 +64,16 @@ async def upload_to_s3(audiofile: UploadFile):
 
     key = f"{filename}_{uuid.uuid4()}.{file_extension}"
 
-    print(f"s3_start: {datetime.now().strftime('%H:%M:%S')}", flush=True)
+    s3_upload_start = time.time()
+    print(f"Uploading to s3...", flush=True)
     response = await aws.upload_file_content_directly_to_s3(
         file_like_obj, aws_bucket, key, audiofile.content_type
     )
-    print(f"s3_end: {datetime.now().strftime('%H:%M:%S')}", flush=True)
+    s3_upload_end = time.time()
+    print(
+        f"Upload to s3 finised. Time needed: {s3_upload_end - s3_upload_start}",
+        flush=True,
+    )
     return response
 
 
@@ -75,10 +81,15 @@ async def send_to_whisper(file: UploadFile, model: str):
     content = file.file.read()  # The file pointer is after read() at the end
     file.file.seek(0)  # Move the file pointer to the beginning of the file
 
-    print(f"whisper_start: {datetime.now().strftime('%H:%M:%S')}", flush=True)
+    whisper_upload_start = time.time()
+    print(f"Sending file to whisper for transcription...", flush=True)
     response = await whisper.request_with_upload_file_directly(
         file.filename, content, model
     )
-    print(f"whisper_end: {datetime.now().strftime('%H:%M:%S')}", flush=True)
+    whisper_upload_end = time.time()
+    print(
+        f"Response from whisper received. Time needed: {whisper_upload_end - whisper_upload_start}",
+        flush=True,
+    )
 
     return response
