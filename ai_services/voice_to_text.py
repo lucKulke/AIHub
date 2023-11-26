@@ -9,16 +9,10 @@ class Whisper:
     def __init__(self, server_url):
         self.server_url = server_url
 
-    def request_with_presigned_url(self, presigned_url, model):
-        payload = {"model_size": model, "input": presigned_url}
-        try:
-            response = requests.post(f"{self.server_url}/invocations", json=payload)
-        except Exception as err:
-            response = f"error in whisper service: {err}"
-        return response.json()
-
     async def request_with_upload_file_directly(self, filename, content, model):
-        whisper_api_url = f"{self.server_url}/upload_direct/{model}"
+        whisper_api_url = (
+            f"{self.server_url}/invocations/upload_file/?model_size={model}"
+        )
 
         files = {"audiofile": (filename, content, "audio/wav")}
 
