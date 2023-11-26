@@ -2,6 +2,10 @@ import boto3
 from botocore.exceptions import ClientError
 import logging
 from botocore.config import Config
+import os
+import aioboto3
+from datetime import datetime
+import typing
 
 my_config = Config(
     region_name="eu-north-1",
@@ -9,23 +13,20 @@ my_config = Config(
     retries={"max_attempts": 10, "mode": "standard"},
 )
 s3_client = boto3.client("s3", config=my_config)
+aioboto3_session = aioboto3.Session()
 
 
-def upload_file_to_s3(file_path, bucket_name, key):
-    try:
-        response = s3_client.upload_file(
-            file_path,
-            bucket_name,
-            key,
-            ExtraArgs={
-                "ContentType": "audio/wav",
-                "Metadata": {"ContentType": "audio/wav"},
-            },
-        )
-    except ClientError as e:
-        logging.error(e)
-        return False
-    return True
+async def upload_file_content_directly_to_s3(
+    file: typing.BinaryIO, bucket: str, key: str
+):
+    async with aioboto3_session.client("s3", config=my_config) as s3:
+        try:
+            await s3.upload_fileobj(file, bucket, key)
+        except Exception as e:
+            print(f"Unable to s3 upload to {key}: {e} ({type(e)})", flush=True)
+            return str(e)
+
+    return "successfully stored in s3"
 
 
 def create_presigned_url_expanded(

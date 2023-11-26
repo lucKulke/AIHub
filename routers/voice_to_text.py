@@ -7,52 +7,66 @@ from utilitys import aws
 import boto3
 import uuid
 import tempfile
-import time
+from datetime import datetime
+import asyncio
+import requests
+import httpx
+import typing
+import re
+
 
 router = APIRouter(prefix="/voice_to_text", tags=["Voice to text"])
 
 aws_bucket = os.getenv("AWS_BUCKET_NAME")
-os.getenv("AWS_REGION")
+
+whisper = Whisper("http://localhost:8080")
 
 
 @router.post("/whisper")
-def whisper_response(
-    audio_file: UploadFile = File(...), model: str = Form(...), only_text: bool = True
+async def whisper_response(
+    audiofile: UploadFile = File(...), model: str = Form(...), only_text: bool = True
 ):
-    upload_directory = "./temp_audio"
-    try:
-        # Ensure the specified directory exists; create it if not
+    s3_task = upload_to_s3(audiofile)
+    whisper_task = send_to_whisper(audiofile, model)
 
-        filename = "recording_" + str(uuid.uuid4()) + ".wav"
-        # Combine the directory path with the uploaded audio file's name
+    whisper_result, s3_task_result = await asyncio.gather(
+        whisper_task, s3_task
+    )  # Wait for both tasks to complete
 
-        # Save the uploaded audio file to the specified directory
-        with tempfile.TemporaryDirectory() as temp_dir:
-            # Generate a unique filename for the uploaded audio file
-            temp_file_path = f"{temp_dir}/{filename}"
+    response = whisper_result
+    if only_text == True:
+        response = response["predictions"]["segments"][0][4]
 
-            # Save the uploaded audio file to the temporary directory
-            with open(temp_file_path, "wb") as f:
-                f.write(audio_file.file.read())
+    return {"whisper_result": response, "file_status": s3_task_result}
 
-                success = aws.upload_file_to_s3(temp_file_path, aws_bucket, filename)
-                if success:
-                    presigned_url = aws.create_presigned_url_expanded(
-                        "get_object",
-                        {"Bucket": aws_bucket, "Key": filename},
-                        http_method="GET",
-                    )
 
-                    print(presigned_url, flush=True)
-                    response = Whisper("http://localhost:8080/invocations").request(
-                        presigned_url, model
-                    )
+async def upload_to_s3(audiofile: UploadFile):
+    file_like_obj = audiofile.file
 
-        # Optionally, you can return the path of the saved file
-        if only_text:
-            return response["predictions"]["segments"][0][4]
-        else:
-            return response
-    except Exception as e:
-        print(f"error: {str(e)}")
-        return Response(content=f"error: {str(e)}", status_code=500)
+    filename = re.match(r"(.+?)\.\w+", audiofile.filename).group(
+        1
+    )  # get filename without extension
+
+    file_extension = re.search(r"/(\w+)", audiofile.content_type).group(1)
+
+    key = f"{filename}_{uuid.uuid4()}.{file_extension}"
+
+    print(f"s3_start: {datetime.now().strftime('%H:%M:%S')}", flush=True)
+    response = await aws.upload_file_content_directly_to_s3(
+        file_like_obj, aws_bucket, key
+    )
+    print(f"s3_end: {datetime.now().strftime('%H:%M:%S')}", flush=True)
+    return response
+
+
+async def send_to_whisper(file: UploadFile, model: str):
+    content = file.file.read()  # The file pointer is after read() at the end
+    file.file.seek(0)  # Move the file pointer to the beginning of the file
+
+    print(f"whisper_start: {datetime.now().strftime('%H:%M:%S')}", flush=True)
+    response = await whisper.request_with_upload_file_directly(
+        file.filename, content, model
+    )
+    print(f"whisper_end: {datetime.now().strftime('%H:%M:%S')}", flush=True)
+
+    return response
