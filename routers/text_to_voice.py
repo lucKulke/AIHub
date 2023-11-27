@@ -7,7 +7,7 @@ from schemas.text_to_voice import TextToVoice
 from ai_services.text_to_voice import AzureVoice
 
 
-subscription_key = os.getenv("AWS_VOICE_SUBSCRIPTION_KEY")
+subscription_key = os.getenv("AZURE_VOICE_SUBSCRIPTION_KEY")
 router = APIRouter(prefix="/text_to_voice", tags=["Text to voice"])
 
 
