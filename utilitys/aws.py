@@ -7,8 +7,9 @@ import aioboto3
 from datetime import datetime
 import typing
 
+region = os.getenv("AWS_BUCKET_REGION")
 my_config = Config(
-    region_name="eu-north-1",
+    region_name=region,
     signature_version="v4",
     retries={"max_attempts": 10, "mode": "standard"},
 )
