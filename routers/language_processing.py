@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends
-from typing import Union
+from fastapi import APIRouter, Depends, Security
+from typing import Union, Annotated
 from datetime import datetime
 from sqlalchemy.orm import Session
 import asyncio
@@ -9,12 +9,19 @@ from schemas.language_processing import ChatGPTSchema
 from db.database_connection import get_db
 from db import crud
 
+from security.handler import get_current_active_user
+from security.schemas import User
+
 router = APIRouter(prefix="/language_processing", tags=["Language processing"])
 
 
 @router.post("/chat_gpt")
 async def generate_chat_gpt_response(
-    conversation: ChatGPTSchema, db: Session = Depends(get_db)
+    current_user: Annotated[
+        User, Security(get_current_active_user, scopes=["chat_gpt"])
+    ],
+    conversation: ChatGPTSchema,
+    db: Session = Depends(get_db),
 ):
     api_key = os.getenv("OPEN_AI_KEY")
 
