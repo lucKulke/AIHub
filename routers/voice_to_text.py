@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Response, Form, UploadFile, File, HTTPException
+from fastapi import APIRouter, Response, Form, UploadFile, File, HTTPException, Security
 from schemas.voice_to_text import WhisperSchema
 from ai_services.voice_to_text import Whisper
 import shutil
@@ -11,9 +11,11 @@ from datetime import datetime
 import asyncio
 import requests
 import httpx
-import typing
+from typing import Annotated
 import re
 import time
+from security.handler import get_current_active_user
+from security.schemas import User
 
 
 router = APIRouter(prefix="/voice_to_text", tags=["Voice to text"])
@@ -25,9 +27,15 @@ whisper = Whisper("http://localhost:8080")
 
 @router.post("/whisper")
 async def whisper_response(
-    audiofile: UploadFile = File(...), model: str = Form(...), only_text: bool = True
+    current_user: Annotated[
+        User, Security(get_current_active_user, scopes=["whisper"])
+    ],
+    audiofile: UploadFile = File(...),
+    model: str = Form(...),
+    only_text: bool = True,
 ):
     if not audiofile.content_type in [
+        "audio/x-wav",
         "audio/wave",
         "audio/wav",
         "audio/mp3",
