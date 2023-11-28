@@ -20,7 +20,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRATION_TIME"))
 fake_users_db = {
     "lucaskulke": {
         "username": os.getenv("AIHUB_ADMIN_USERNAME"),
-        "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
+        "hashed_password": os.getenv("AIHUB_ADMIN_PASSWORD"),
         "disabled": False,
         "scopes": ["me", "items", "create_user"],
     }
