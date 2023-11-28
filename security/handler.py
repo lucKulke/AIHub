@@ -22,7 +22,7 @@ fake_users_db = {
         "username": os.getenv("AIHUB_ADMIN_USERNAME"),
         "hashed_password": os.getenv("AIHUB_ADMIN_PASSWORD"),
         "disabled": False,
-        "scopes": ["me", "items", "create_user"],
+        "scopes": [],
     }
 }
 
