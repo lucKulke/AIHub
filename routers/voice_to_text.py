@@ -22,17 +22,18 @@ router = APIRouter(prefix="/voice_to_text", tags=["Voice to text"])
 
 aws_bucket = os.getenv("AWS_BUCKET_NAME")
 
-whisper = Whisper("http://localhost:8080")
+whisper = Whisper(os.getenv("WHISPER_DOCKERIZED_URL"))
 
 
-@router.post("/whisper")
+@router.post("/whisper/")
 async def whisper_response(
     current_user: Annotated[
         User, Security(get_current_active_user, scopes=["whisper"])
     ],
     audiofile: UploadFile = File(...),
-    model: str = Form(...),
+    model: str = "small",
     only_text: bool = True,
+    timeout: float = 86400.0,  # 24 hours
 ):
     if not audiofile.content_type in [
         "audio/x-wav",
@@ -48,7 +49,7 @@ async def whisper_response(
         )
 
     s3_task = upload_to_s3(audiofile)
-    whisper_task = send_to_whisper(audiofile, model)
+    whisper_task = send_to_whisper(audiofile, model, timeout)
 
     whisper_result, s3_task_result = await asyncio.gather(
         whisper_task, s3_task
@@ -85,14 +86,14 @@ async def upload_to_s3(audiofile: UploadFile):
     return response
 
 
-async def send_to_whisper(file: UploadFile, model: str):
+async def send_to_whisper(file: UploadFile, model: str, timeout: float):
     content = file.file.read()  # The file pointer is after read() at the end
     file.file.seek(0)  # Move the file pointer to the beginning of the file
 
     whisper_upload_start = time.time()
     print(f"Sending file to whisper for transcription...", flush=True)
     response = await whisper.request_with_upload_file_directly(
-        file.filename, content, model
+        file.filename, content, model, timeout
     )
     whisper_upload_end = time.time()
     print(
