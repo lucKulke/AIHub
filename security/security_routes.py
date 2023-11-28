@@ -46,7 +46,7 @@ async def login_for_access_token(
 
 
 @router.post("/create_user/")
-async def read_own_items(
+async def create_user(
     current_user: Annotated[
         User, Security(get_current_active_user, scopes=["create_user"])
     ],
