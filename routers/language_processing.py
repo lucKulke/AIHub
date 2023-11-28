@@ -1,13 +1,12 @@
 from fastapi import APIRouter, Depends, Security
 from typing import Union, Annotated
 from datetime import datetime
-from sqlalchemy.orm import Session
+
 import asyncio
 import os
 from ai_services.language_processing import ChatGPT
 from schemas.language_processing import ChatGPTSchema
-from db.database_connection import get_db
-from db import crud
+
 
 from security.handler import get_current_active_user
 from security.schemas import User
@@ -21,7 +20,6 @@ async def generate_chat_gpt_response(
         User, Security(get_current_active_user, scopes=["chat_gpt"])
     ],
     conversation: ChatGPTSchema,
-    db: Session = Depends(get_db),
 ):
     api_key = os.getenv("OPEN_AI_KEY")
 
