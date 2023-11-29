@@ -9,7 +9,7 @@ from schemas.language_processing import ChatGPTSchema
 
 
 from security.handler import get_current_active_user
-from security.schemas import User
+from security.security_schemas import User
 
 router = APIRouter(prefix="/language_processing", tags=["Language processing"])
 

@@ -6,7 +6,8 @@ from ai_services.image_generation import Dalle
 from schemas.image_generation import ImageData
 
 from security.handler import get_current_active_user
-from security.schemas import User
+
+from security.security_schemas import User
 
 router = APIRouter(prefix="/image_generation", tags=["Image generation"])
 

@@ -8,7 +8,7 @@ from ai_services.text_to_voice import AzureVoice
 
 from typing import Annotated
 from security.handler import get_current_active_user
-from security.schemas import User
+from security.security_schemas import User
 
 subscription_key = os.getenv("AZURE_VOICE_SUBSCRIPTION_KEY")
 router = APIRouter(prefix="/text_to_voice", tags=["Text to voice"])
