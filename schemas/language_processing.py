@@ -14,5 +14,5 @@ class Instance(BaseModel):
 
 class ChatGPTSchema(BaseModel):
     instances: Dict[str, Instance]
-    model: str = Field(default="gpt-3.5-turbo", description="max token")
+    model: str = Field(default="gpt-3.5-turbo", description="chat-gpt model")
     token: int = Field(default=100, description="max token")
