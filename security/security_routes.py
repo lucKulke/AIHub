@@ -61,9 +61,9 @@ async def create_user(
 
 
 @router.post("/disable_user/", response_model=User)
-async def create_user(
+async def disable_user(
     current_user: Annotated[
-        User, Security(get_current_active_user, scopes=["create_user"])
+        User, Security(get_current_active_user, scopes=["disable_user"])
     ],
     username: str,
     db: Session = Depends(get_db),
