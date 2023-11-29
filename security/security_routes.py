@@ -2,22 +2,19 @@ from datetime import datetime, timedelta
 from fastapi import FastAPI, APIRouter, Depends, HTTPException, status, Security
 import os
 from .handler import (
-    verify_password,
-    get_password_hash,
     authenticate_user,
     create_access_token,
     ACCESS_TOKEN_EXPIRE_MINUTES,
     get_current_active_user,
-    fake_users_db,
 )
-from .schemas import UserInDB, User, NewUser, UserInDB, TokenData, Token
+from .security_schemas import User, NewUser, Token
 from typing import Annotated
 
-from fastapi.security import (
-    OAuth2PasswordBearer,
-    OAuth2PasswordRequestForm,
-    SecurityScopes,
-)
+from fastapi.security import OAuth2PasswordRequestForm
+
+from db import crud
+from db.database_connection import get_db
+from sqlalchemy.orm import Session
 
 
 router = APIRouter(tags=["Security"])
@@ -27,7 +24,7 @@ router = APIRouter(tags=["Security"])
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
 ):
-    user = authenticate_user(fake_users_db, form_data.username, form_data.password)
+    user = authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -45,19 +42,35 @@ async def login_for_access_token(
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.post("/create_user/")
+@router.post("/create_user/", response_model=User)
 async def create_user(
     current_user: Annotated[
         User, Security(get_current_active_user, scopes=["create_user"])
     ],
     new_user: NewUser,
+    db: Session = Depends(get_db),
 ):
-    if new_user.username in fake_users_db:
+    user = crud.get_user(db, new_user.username)
+    if user:
         raise HTTPException(status_code=403, detail="already exits")
 
-    new_user_dict = dict(new_user)
-    hashed_password = get_password_hash(new_user.password)
-    new_user_dict["hashed_password"] = hashed_password
-    del new_user_dict["password"]
-    fake_users_db[new_user.username] = new_user_dict
-    return {"new_user": new_user_dict, "db": fake_users_db}
+    user = crud.create_user(db, new_user)
+    db.commit()
+
+    return user
+
+
+@router.post("/disable_user/", response_model=User)
+async def disable_user(
+    current_user: Annotated[
+        User, Security(get_current_active_user, scopes=["disable_user"])
+    ],
+    username: str,
+    db: Session = Depends(get_db),
+):
+    user = crud.disable_user(db, username)
+    if user:
+        db.commit()
+        return user
+
+    raise HTTPException(status_code=404, detail="user does not exist.")

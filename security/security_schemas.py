@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError, ConfigDict
 
 
 class User(BaseModel):
@@ -12,7 +12,7 @@ class NewUser(User):
 
 
 class UserInDB(User):
-    hashed_password: str
+    password: str
     scopes: list
 
 
