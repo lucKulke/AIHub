@@ -1,30 +1,23 @@
 from datetime import datetime, timedelta
 from typing import Annotated
 from fastapi import FastAPI, Depends, HTTPException, status
-from passlib.context import CryptContext
+
 from jose import JWTError, jwt
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from pydantic import ValidationError
 import os
-from .schemas import UserInDB, TokenData, User
+from .security_schemas import UserInDB, TokenData, User
+from db.database_connection import SessionLocal
+from db import crud
+from utilitys.hashing import verify_password, get_password_hash
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 SECRET_KEY = os.getenv("JWT_SECRET")
 ALGORITHM = os.getenv("JWT_ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRATION_TIME"))
-
-fake_users_db = {
-    os.getenv("AIHUB_ADMIN_USERNAME"): {
-        "username": os.getenv("AIHUB_ADMIN_USERNAME"),
-        "hashed_password": os.getenv("AIHUB_ADMIN_PASSWORD"),
-        "disabled": False,
-        "scopes": [],
-    }
-}
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
@@ -38,27 +31,29 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
-
-
-def get_password_hash(password):
-    return pwd_context.hash(password)
-
-
-def authenticate_user(fake_db, username: str, password: str):
-    user = get_user(fake_db, username)
+def authenticate_user(username: str, password: str):
+    user = get_user(username)
     if not user:
         return False
-    if not verify_password(password, user.hashed_password):
+    if not verify_password(password, user.password):
         return False
     return user
 
 
-def get_user(db, username: str):
-    if username in db:
-        user_dict = db[username]
+scopes_string_to_list = lambda s: s.split(",")
+
+
+def get_user(username: str):
+    db = SessionLocal()
+    try:
+        user = crud.get_user(db, username)
+        user_dict = user.__dict__
+        # Remove the "_sa_instance_state" key, which is specific to SQLAlchemy
+        user_dict.pop("_sa_instance_state", None)
+        user_dict["scopes"] = scopes_string_to_list(user_dict["scopes"])
         return UserInDB(**user_dict)
+    finally:
+        db.close()
 
 
 async def get_current_user(
@@ -82,7 +77,7 @@ async def get_current_user(
         token_data = TokenData(scopes=token_scopes, username=username)
     except (JWTError, ValidationError):
         raise credentials_exception
-    user = get_user(fake_users_db, username=token_data.username)
+    user = get_user(username=token_data.username)
     if user is None:
         raise credentials_exception
     for scope in security_scopes.scopes:
@@ -98,7 +93,6 @@ async def get_current_user(
 async def get_current_active_user(
     current_user: Annotated[User, Depends(get_current_user)]
 ):
-    print(current_user.disabled)
     if current_user.disabled:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise HTTPException(status_code=400, detail="Account disabled!")
     return current_user
