@@ -23,8 +23,6 @@ async def generate_chat_gpt_response(
 ):
     api_key = os.getenv("OPEN_AI_KEY")
 
-    # crud.add_application(db, "Test app", 1)
-
     return await chat_gpt_response(
         ChatGPT(api_key),
         conversation.model,
