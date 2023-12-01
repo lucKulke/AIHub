@@ -12,3 +12,12 @@ class Users(Base):
 
     class Config:
         orm_mode = True
+
+
+# class LanguageProcessingModel(Base):
+#     __tablename__ = "language_processing"
+
+# username
+# ai_service
+# text_input
+# text_output
