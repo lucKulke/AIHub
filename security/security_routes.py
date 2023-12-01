@@ -39,7 +39,18 @@ async def login_for_access_token(
         },
         expires_delta=access_token_expires,
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    print(type(minutes_to_timestamp(ACCESS_TOKEN_EXPIRE_MINUTES)), flush=True)
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "expires_at": minutes_to_timestamp(ACCESS_TOKEN_EXPIRE_MINUTES),
+    }
+
+
+def minutes_to_timestamp(minutes):
+    current_time = datetime.utcnow()
+    expiration_time = current_time + timedelta(minutes=minutes)
+    return expiration_time.timestamp()
 
 
 @router.post("/create_user/", response_model=User)
