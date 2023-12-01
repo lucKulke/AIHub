@@ -1,4 +1,5 @@
 from pydantic import BaseModel, ValidationError, ConfigDict
+from datetime import datetime
 
 
 class User(BaseModel):
@@ -19,6 +20,7 @@ class UserInDB(User):
 class Token(BaseModel):
     access_token: str
     token_type: str
+    expires_at: float
 
 
 class TokenData(BaseModel):
