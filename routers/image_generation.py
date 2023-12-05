@@ -11,6 +11,8 @@ from security.security_schemas import User
 
 router = APIRouter(prefix="/image_generation", tags=["Image generation"])
 
+dalle = Dalle(os.getenv("OPEN_AI_KEY"))
+
 
 @router.post("/dalle")
 async def generate_dalle_response(
@@ -19,8 +21,7 @@ async def generate_dalle_response(
     ],
     image_data: ImageData,
 ):
-    open_ai_key = os.getenv("OPEN_AI_KEY")
-    response = Dalle(open_ai_key).request(
+    response = dalle.request(
         image_data.description, image_data.number_of_pictures, image_data.size
     )
     return {"url": response}
