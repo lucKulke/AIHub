@@ -18,7 +18,7 @@ whisper = Whisper(os.getenv("WHISPER_DOCKERIZED_URL"))
 
 
 @router.post("/whisper/")
-async def whisper_response(
+async def local_whisper_response(
     current_user: Annotated[
         User, Security(get_current_active_user, scopes=["whisper"])
     ],
@@ -38,7 +38,7 @@ async def whisper_response(
     ]:
         raise HTTPException(
             status_code=400,
-            detail=f"file: {audiofile.filename} is not an audiofile! possible formats: wav, mp3, ogg, mpeg",
+            detail=f"file: {audiofile.filename} is not an audiofile! possible formats: webm, wav-x, wav, mp3, ogg, mpeg",
         )
 
     if audiofile.content_type == "audio/webm":
