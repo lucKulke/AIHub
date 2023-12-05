@@ -47,10 +47,12 @@ def get_user(username: str):
     db = SessionLocal()
     try:
         user = crud.get_user(db, username)
+
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Auth Error"
             )
+
         user_dict = user.__dict__
         # Remove the "_sa_instance_state" key, which is specific to SQLAlchemy
         user_dict.pop("_sa_instance_state", None)

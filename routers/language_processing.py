@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Security
 from typing import Union, Annotated
 
+
 import asyncio
 import os
 from ai_services.language_processing import ChatGPT
