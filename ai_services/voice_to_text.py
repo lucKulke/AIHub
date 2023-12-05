@@ -1,6 +1,6 @@
 import requests
 from typing import BinaryIO
-
+from fastapi import HTTPException, status
 from datetime import datetime
 import httpx
 
@@ -28,8 +28,13 @@ class Whisper:
                 response.raise_for_status()
                 json_response = response.json()
         except httpx.ReadTimeout as timeout_err:
-            json_response = {{"ReadTimeoutError": f"Timeout error: {timeout_err}"}}
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="TimeoutError"
+            )
         except httpx.HTTPError as http_err:
-            json_response = {"HTTPError": f"HTTP error: {http_err.response.content}"}
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Unable to connect to Whisper",
+            )
 
         return json_response

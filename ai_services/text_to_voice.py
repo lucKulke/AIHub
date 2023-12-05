@@ -40,7 +40,7 @@ class AzureVoice:
         url = "https://westeurope.tts.speech.microsoft.com/cognitiveservices/v1"
 
         # Send the POST request
-        return requests.post(url, headers=headers, data=xml_body)
+        return requests.post(url, headers=headers, data=xml_body.encode("utf-8"))
 
     def list_of_azure_voices(self, subkey):
         token = azure.get_access_token(subkey)

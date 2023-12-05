@@ -5,7 +5,6 @@ import os
 from utilitys import azure
 from schemas.text_to_voice import TextToVoice
 from ai_services.text_to_voice import AzureVoice
-
 from typing import Annotated
 from security.handler import get_current_active_user
 from security.security_schemas import User
@@ -36,7 +35,7 @@ def azure_voice(
     if response.status_code != 200:
         HTTPException(status_code=response.status_code, detail=response.text)
 
-    audio_data = response.content  # Replace with your audio generation logic
+    audio_data = response.content
 
     # Set the content type header to indicate that it's an audio file (e.g., WAV)
     headers = {
@@ -45,7 +44,6 @@ def azure_voice(
     }
     # Return the audio file as a response
     return Response(content=audio_data, headers=headers)
-    # Check the response status code and content
 
 
 @router.get("/azure/available_voices")
@@ -56,7 +54,7 @@ def azure_voices():
 @router.get("/azure/speakers")
 def azure_speakers():
     content = AzureVoice().list_of_azure_voices(subscription_key)
+
     return Response(
         content=content, headers={"Content-Type": "application/json; charset=utf-8"}
     )
-    return AzureVoice().list_of_azure_voices(subscription_key)

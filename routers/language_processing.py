@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Security
 from typing import Union, Annotated
-from datetime import datetime
+
 
 import asyncio
 import os
@@ -12,6 +12,7 @@ from security.handler import get_current_active_user
 from security.security_schemas import User
 
 router = APIRouter(prefix="/language_processing", tags=["Language processing"])
+chat_gpt = ChatGPT(os.getenv("OPEN_AI_KEY"))
 
 
 @router.post("/chat_gpt")
@@ -21,12 +22,8 @@ async def generate_chat_gpt_response(
     ],
     conversation: ChatGPTSchema,
 ):
-    api_key = os.getenv("OPEN_AI_KEY")
-
-    # crud.add_application(db, "Test app", 1)
-
     return await chat_gpt_response(
-        ChatGPT(api_key),
+        chat_gpt,
         conversation.model,
         conversation.instances,
         conversation.token,
