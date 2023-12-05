@@ -12,4 +12,3 @@ class Users(Base):
 
     class Config:
         orm_mode = True
-

@@ -1,10 +1,14 @@
 from fastapi import FastAPI, routing
-from db.database_connection import engine, SessionLocal
-from db import models
-from routers import language_processing, text_to_voice, voice_to_text, image_generation
-from security import security_routes, handler, security_schemas
+from src.db.database_connection import engine, SessionLocal
+from src.db import models, crud
+from src.routers import (
+    language_processing,
+    text_to_voice,
+    voice_to_text,
+    image_generation,
+)
+from src.security import security_routes, handler, security_schemas
 
-from db import crud
 import re, os
 
 

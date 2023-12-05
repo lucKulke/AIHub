@@ -2,12 +2,12 @@ from fastapi import APIRouter, Security
 from typing import Union, Annotated
 
 import os
-from ai_services.image_generation import Dalle
-from schemas.image_generation import ImageData
+from ..ai_services.image_generation import Dalle
+from ..schemas.image_generation import ImageData
 
-from security.handler import get_current_active_user
+from ..security.handler import get_current_active_user
 
-from security.security_schemas import User
+from ..security.security_schemas import User
 
 router = APIRouter(prefix="/image_generation", tags=["Image generation"])
 

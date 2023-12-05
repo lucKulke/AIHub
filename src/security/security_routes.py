@@ -12,8 +12,8 @@ from typing import Annotated
 
 from fastapi.security import OAuth2PasswordRequestForm
 
-from db import crud
-from db.database_connection import get_db
+from ..db import crud
+from ..db.database_connection import get_db
 from sqlalchemy.orm import Session
 
 

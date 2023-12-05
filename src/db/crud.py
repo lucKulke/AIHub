@@ -2,8 +2,8 @@ from sqlalchemy.orm import Session
 from fastapi import Depends
 
 from . import models
-from utilitys.hashing import get_password_hash
-from security.security_schemas import NewUser
+from ..utilitys.hashing import get_password_hash
+from ..security.security_schemas import NewUser
 
 scopes_list_to_string = lambda l: ",".join(l)
 

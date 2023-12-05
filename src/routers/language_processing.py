@@ -4,12 +4,12 @@ from typing import Union, Annotated
 
 import asyncio
 import os
-from ai_services.language_processing import ChatGPT
-from schemas.language_processing import ChatGPTSchema
+from ..ai_services.language_processing import ChatGPT
+from ..schemas.language_processing import ChatGPTSchema
 
 
-from security.handler import get_current_active_user
-from security.security_schemas import User
+from ..security.handler import get_current_active_user
+from ..security.security_schemas import User
 
 router = APIRouter(prefix="/language_processing", tags=["Language processing"])
 chat_gpt = ChatGPT(os.getenv("OPEN_AI_KEY"))

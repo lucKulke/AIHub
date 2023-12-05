@@ -7,9 +7,9 @@ from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from pydantic import ValidationError
 import os
 from .security_schemas import UserInDB, TokenData, User
-from db.database_connection import SessionLocal
-from db import crud
-from utilitys.hashing import verify_password, get_password_hash
+from ..db.database_connection import SessionLocal
+from ..db import crud
+from ..utilitys.hashing import verify_password, get_password_hash
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")

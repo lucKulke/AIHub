@@ -1,5 +1,5 @@
 import requests
-from utilitys import azure
+from ..utilitys import azure
 import json
 
 
