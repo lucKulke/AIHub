@@ -1,21 +1,13 @@
-from fastapi import APIRouter, Response, Form, UploadFile, File, HTTPException, Security
-from schemas.voice_to_text import WhisperSchema
+from fastapi import APIRouter, UploadFile, File, HTTPException, Security
 from ai_services.voice_to_text import Whisper
-import shutil
-import os
 from utilitys import aws
-import boto3
-import uuid
-import tempfile
-from datetime import datetime
-import asyncio
-import requests
-import httpx
+
 from typing import Annotated
-import re
-import time
+import re, io, time, os, uuid, asyncio
+
 from security.handler import get_current_active_user
 from security.security_schemas import User
+from pydub import AudioSegment
 
 
 router = APIRouter(prefix="/voice_to_text", tags=["Voice to text"])
@@ -36,6 +28,7 @@ async def whisper_response(
     timeout: float = 86400.0,  # 24 hours
 ):
     if not audiofile.content_type in [
+        "audio/webm",
         "audio/x-wav",
         "audio/wave",
         "audio/wav",
@@ -46,6 +39,26 @@ async def whisper_response(
         raise HTTPException(
             status_code=400,
             detail=f"file: {audiofile.filename} is not an audiofile! possible formats: wav, mp3, ogg, mpeg",
+        )
+
+    if audiofile.content_type == "audio/webm":
+        conversion_start = time.time()
+        webm_audio = AudioSegment.from_file(audiofile.file, format="webm")
+
+        # Export AudioSegment as WAV file
+        wav_buffer = io.BytesIO()
+        webm_audio.export(wav_buffer, format="wav")
+        wav_buffer.seek(0)
+
+        audiofile = UploadFile(
+            filename=audiofile.filename,
+            headers={"content-type": "audio/wav"},
+            file=wav_buffer,
+        )
+        conversion_stop = time.time()
+        print(
+            f"The conversion from audio/webm to audio/wav has finished. Time needed: {conversion_stop - conversion_start}",
+            flush=True,
         )
 
     s3_task = upload_to_s3(audiofile)
