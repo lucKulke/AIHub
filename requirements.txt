@@ -11,3 +11,4 @@ pydub
 asyncio
 httpx
 aioboto3
+jose
