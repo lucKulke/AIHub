@@ -16,9 +16,7 @@ dalle = Dalle(os.getenv("OPEN_AI_KEY"))
 
 @router.post("/dalle")
 async def generate_dalle_response(
-    current_user: Annotated[
-        User, Security(get_current_active_user, scopes=["create_user"])
-    ],
+    current_user: Annotated[User, Security(get_current_active_user, scopes=["dalle"])],
     image_data: ImageData,
 ):
     response = dalle.request(
