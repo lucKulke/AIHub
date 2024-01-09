@@ -10,7 +10,6 @@ from ..security.security_schemas import User
 
 from pydub import AudioSegment
 
-
 router = APIRouter(prefix="/voice_to_text", tags=["Voice to text"])
 
 aws_bucket = os.getenv("AWS_BUCKET_NAME")
@@ -70,8 +69,10 @@ async def local_whisper_response(
     )  # Wait for both tasks to complete
 
     response = whisper_result
+    text = get_only_text(response)
+
     if only_text == True:
-        response = get_only_text(response)
+        response = text
 
     return {"whisper_result": response, "file_status": s3_task_result}
 
