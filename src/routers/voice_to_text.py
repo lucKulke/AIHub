@@ -71,9 +71,16 @@ async def local_whisper_response(
 
     response = whisper_result
     if only_text == True:
-        response = response["predictions"]["segments"][0][4]
+        response = get_only_text(response)
 
     return {"whisper_result": response, "file_status": s3_task_result}
+
+
+def get_only_text(response):
+    text = ""
+    for segment in response["predictions"]["segments"]:
+        text += segment[4]
+    return text.lstrip()
 
 
 async def upload_to_s3(audiofile: UploadFile):
