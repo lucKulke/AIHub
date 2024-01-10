@@ -1,20 +1,23 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, Security
-from ..ai_services.voice_to_text import Whisper
-from ..utilitys import aws
+from fastapi import APIRouter, UploadFile, File, HTTPException, Security, Form, Depends
+from ..ai_services.voice_to_text import SpeechRecogniser
+from ..utilitys import aws, converter
 
 from typing import Annotated
-import re, io, time, os, uuid, asyncio
+import re, io, time, os, uuid, asyncio, base64, requests
 
 from ..security.handler import get_current_active_user
 from ..security.security_schemas import User
+from ..schemas.voice_to_text import RunPodSchema
 
-from pydub import AudioSegment
 
 router = APIRouter(prefix="/voice_to_text", tags=["Voice to text"])
 
 aws_bucket = os.getenv("AWS_BUCKET_NAME")
 
-whisper = Whisper(os.getenv("WHISPER_DOCKERIZED_URL"))
+speech_recogniser = SpeechRecogniser(
+    serverful_url=os.getenv("WHISPER_DOCKERIZED_URL"),
+    runpod_api_key=os.getenv("RUNPOD_KEY"),
+)
 
 
 @router.post("/whisper/")
@@ -27,42 +30,18 @@ async def local_whisper_response(
     only_text: bool = True,
     timeout: float = 86400.0,  # 24 hours
 ):
-    if not audiofile.content_type in [
-        "audio/webm",
-        "audio/x-wav",
-        "audio/wave",
-        "audio/wav",
-        "audio/mp3",
-        "audio/ogg",
-        "audio/mpeg",
-    ]:
-        raise HTTPException(
-            status_code=400,
-            detail=f"file: {audiofile.filename} is not an audiofile! possible formats: webm, wav-x, wav, mp3, ogg, mpeg",
-        )
+    audiofile_validation(audiofile)
 
     if audiofile.content_type == "audio/webm":
-        conversion_start = time.time()
-        webm_audio = AudioSegment.from_file(audiofile.file, format="webm")
+        audiofile = converter.audio_webm_to_mp3(audiofile)
 
-        # Export AudioSegment as WAV file
-        wav_buffer = io.BytesIO()
-        webm_audio.export(wav_buffer, format="wav")
-        wav_buffer.seek(0)
-
-        audiofile = UploadFile(
-            filename=audiofile.filename,
-            headers={"content-type": "audio/wav"},
-            file=wav_buffer,
-        )
-        conversion_stop = time.time()
-        print(
-            f"The conversion from audio/webm to audio/wav has finished. Time needed: {conversion_stop - conversion_start}",
-            flush=True,
-        )
+    file_content = audiofile.file.read()
+    audiofile.file.seek(0)
 
     s3_task = upload_to_s3(audiofile)
-    whisper_task = send_to_whisper(audiofile, model, timeout)
+    whisper_task = speech_recogniser.request_severful_whisper(
+        filename=audiofile.filename, content=file_content, model=model, timeout=timeout
+    )
 
     whisper_result, s3_task_result = await asyncio.gather(
         whisper_task, s3_task
@@ -77,11 +56,63 @@ async def local_whisper_response(
     return {"whisper_result": response, "file_status": s3_task_result}
 
 
-def get_only_text(response):
+@router.post("/whisper/runpod/endpoint")
+async def whisper_runpod_endpoint_response(
+    # current_user: Annotated[
+    #     User, Security(get_current_active_user, scopes=["faster_whisper"])
+    # ],
+    instructions: RunPodSchema = Depends(),
+    timeout: float = 86400.0,
+    only_text: bool = True,
+    audiofile: UploadFile = File(...),
+):
+    audiofile_validation(audiofile)
+
+    file_content = audiofile.file.read()
+    audiofile.file.seek(0)
+    base64_content = base64.b64encode(file_content).decode("utf-8")
+
+    runpod_task = speech_recogniser.request_runpod_endpoint(
+        audiofile_content=base64_content,
+        timeout=timeout,
+        instructions=instructions.__dict__,
+    )
+    s3_task = upload_to_s3(audiofile)
+
+    runpod_result, s3_result = await asyncio.gather(runpod_task, s3_task)
+
+    if only_text == True:
+        text = ""
+        for segment in runpod_result["output"]["segments"]:
+            text += segment["text"]
+        runpod_result = text.lstrip()
+
+    return {"whisper_result": runpod_result, "file_status": s3_result}
+
+
+def get_only_text(response: dict):
     text = ""
     for segment in response["predictions"]["segments"]:
         text += segment[4]
     return text.lstrip()
+
+
+def audiofile_validation(audiofile: UploadFile):
+    print(audiofile.content_type)
+    if not audiofile.content_type in [
+        "video/webm",
+        "audio/webm",
+        "audio/x-wav",
+        "audio/wave",
+        "audio/wav",
+        "audio/mp3",
+        "audio/ogg",
+        "audio/mpeg",
+    ]:
+        raise HTTPException(
+            status_code=400,
+            detail=f"file: {audiofile.filename} is not an audiofile! possible formats: webm, wav-x, wav, mp3, ogg, mpeg",
+        )
 
 
 async def upload_to_s3(audiofile: UploadFile):
@@ -92,35 +123,9 @@ async def upload_to_s3(audiofile: UploadFile):
     )  # get filename without extension
 
     file_extension = re.search(r"/(\w+)", audiofile.content_type).group(1)
-
     key = f"{filename}_{uuid.uuid4()}.{file_extension}"
 
-    s3_upload_start = time.time()
-    print(f"Uploading to s3...", flush=True)
     response = await aws.upload_file_content_directly_to_s3(
         file_like_obj, aws_bucket, key, audiofile.content_type
     )
-    s3_upload_end = time.time()
-    print(
-        f"Upload to s3 finised. Time needed: {s3_upload_end - s3_upload_start}",
-        flush=True,
-    )
-    return response
-
-
-async def send_to_whisper(file: UploadFile, model: str, timeout: float):
-    content = file.file.read()  # The file pointer is after read() at the end
-    file.file.seek(0)  # Move the file pointer to the beginning of the file
-
-    whisper_upload_start = time.time()
-    print(f"Sending file to whisper for transcription...", flush=True)
-    response = await whisper.request_with_upload_file_directly(
-        file.filename, content, model, timeout
-    )
-    whisper_upload_end = time.time()
-    print(
-        f"Response from whisper received. Time needed: {whisper_upload_end - whisper_upload_start}",
-        flush=True,
-    )
-
     return response
