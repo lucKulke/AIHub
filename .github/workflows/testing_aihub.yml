@@ -26,7 +26,6 @@ jobs:
         run: uvicorn ctms.main:ctms --port 8003
 
   run_tests:
-    needs: run_ctms
     runs-on: ubuntu-latest
 
     services:
