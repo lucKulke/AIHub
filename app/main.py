@@ -7,9 +7,10 @@ from src.routers import (
     voice_to_text_routes,
     image_generation_routes,
 )
-from src.security import security_routes, handler, security_schemas
+from src.security import security_routes, security_schemas
 
-import re, os
+import os
+import re
 
 
 models.Base.metadata.create_all(bind=engine)

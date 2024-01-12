@@ -1,9 +1,12 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, Security, Form, Depends
+from fastapi import APIRouter, UploadFile, File, HTTPException, Security, Depends
 from ..ai_services.voice_to_text_services import SpeechRecogniser
 from ..utilitys import aws, converter
-
 from typing import Annotated
-import re, io, time, os, uuid, asyncio, base64, requests
+import re
+import os
+import uuid
+import asyncio
+import base64
 
 from ..security.handler import get_current_active_user
 from ..security.security_schemas import User
@@ -50,7 +53,7 @@ async def local_whisper_response(
     response = whisper_result
     text = get_only_text(response)
 
-    if only_text == True:
+    if only_text:
         response = text
 
     return {"whisper_result": response, "file_status": s3_task_result}
@@ -81,7 +84,7 @@ async def whisper_runpod_endpoint_response(
 
     runpod_result, s3_result = await asyncio.gather(runpod_task, s3_task)
 
-    if only_text == True:
+    if only_text:
         text = ""
         for segment in runpod_result["output"]["segments"]:
             text += segment["text"]
@@ -99,7 +102,7 @@ def get_only_text(response: dict):
 
 def audiofile_validation(audiofile: UploadFile):
     print(audiofile.content_type)
-    if not audiofile.content_type in [
+    if audiofile.content_type not in [
         "video/webm",
         "audio/webm",
         "audio/x-wav",

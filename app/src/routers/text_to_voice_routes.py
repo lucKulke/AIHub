@@ -1,8 +1,5 @@
 from fastapi import APIRouter, Response, HTTPException, Security
-from fastapi.responses import JSONResponse
-import requests
 import os
-from ..utilitys import azure
 from ..schemas.text_to_voice_schemas import TextToVoice
 from ..ai_services.text_to_voice_services import AzureVoice
 from typing import Annotated

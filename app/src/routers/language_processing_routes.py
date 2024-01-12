@@ -1,12 +1,9 @@
-from fastapi import APIRouter, Depends, Security
-from typing import Union, Annotated
-
-
+from fastapi import APIRouter, Security
+from typing import Annotated
 import asyncio
 import os
 from ..ai_services.language_processing_services import ChatGPT
 from ..schemas.language_processing_schemas import ChatGPTSchema
-
 
 from ..security.handler import get_current_active_user
 from ..security.security_schemas import User

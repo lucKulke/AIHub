@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
-from fastapi import FastAPI, APIRouter, Depends, HTTPException, status, Security
-import os
+from fastapi import APIRouter, Depends, HTTPException, status, Security
 from .handler import (
     authenticate_user,
     create_access_token,

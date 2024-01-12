@@ -59,7 +59,7 @@ def fetch_new_token(subscription_key, server_url):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions"
             )
-    except requests.exceptions.RequestException as errex:
+    except requests.exceptions.RequestException:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=f"The requested server url: {server_url} cannot be reached",

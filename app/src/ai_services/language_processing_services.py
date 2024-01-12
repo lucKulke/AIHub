@@ -32,13 +32,15 @@ class ChatGPT:
             message = json_response["choices"][0]["message"]
             response_data = {instance: message}
 
-        except httpx.ReadTimeout as timeout_err:
+        except httpx.ReadTimeout:
             response_data = {
                 instance: {"role": "error", "content": "httpx ReadTimeout error"}
             }
 
         except httpx.HTTPError as http_err:
-            response_data = {instance: {"role": "error", "content": f"httpx error"}}
+            response_data = {
+                instance: {"role": "error", "content": f"{http_err.request._content}"}
+            }
 
         except Exception as err:
             response_data = {instance: f"An error occurred: {err}"}

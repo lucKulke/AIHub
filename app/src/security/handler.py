@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Annotated
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status
 
 from jose import JWTError, jwt
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
@@ -9,7 +9,7 @@ import os
 from .security_schemas import UserInDB, TokenData, User
 from ..db.database_connection import SessionLocal
 from ..db import crud
-from ..utilitys.hashing import verify_password, get_password_hash
+from ..utilitys.hashing import verify_password
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -40,7 +40,8 @@ def authenticate_user(username: str, password: str):
     return user
 
 
-scopes_string_to_list = lambda s: s.split(",")
+def scopes_string_to_list(scopes: str) -> list:
+    return scopes.split(",")
 
 
 def get_user(username: str):

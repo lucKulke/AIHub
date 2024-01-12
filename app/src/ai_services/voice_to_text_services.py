@@ -1,8 +1,6 @@
-import requests
 from typing import BinaryIO
-from fastapi import HTTPException, status, UploadFile
-from datetime import datetime
-import httpx, base64
+from fastapi import HTTPException, status
+import httpx
 
 
 class SpeechRecogniser:
@@ -26,11 +24,11 @@ class SpeechRecogniser:
                 )
                 response.raise_for_status()
                 json_response = response.json()
-        except httpx.ReadTimeout as timeout_err:
+        except httpx.ReadTimeout:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="TimeoutError"
             )
-        except httpx.HTTPError as http_err:
+        except httpx.HTTPError:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Unable to connect to Whisper",
@@ -66,11 +64,11 @@ class SpeechRecogniser:
 
                 response.raise_for_status()
                 json_response = response.json()
-        except httpx.ReadTimeout as timeout_err:
+        except httpx.ReadTimeout:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="TimeoutError"
             )
-        except httpx.HTTPError as http_err:
+        except httpx.HTTPError:
             raise HTTPException(
                 status_code=response.status_code,
                 detail=response.text,
