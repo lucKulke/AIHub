@@ -59,9 +59,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r ./app/requirements.txt
 
-      - name: Wait for PostgreSQL to start
-        run: dockerize -wait tcp://localhost:5432 -timeout 1m
-
       - name: Start Central-Token-Management-System
         run: uvicorn ctms.main:ctms --port 8003
 
