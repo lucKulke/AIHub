@@ -39,4 +39,4 @@ AZURE_VOICE_SUBSCRIPTION_KEY = "Azure voice subscription key for voice generatio
 
 **Usage**:
 
-After starting the AIHub server visit the `/docs` route to see the required request formats and testing the services.
+After starting the AIHub server visit the `/docs` route to see the required request formats and testing the services..
