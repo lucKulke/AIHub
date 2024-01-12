@@ -1,10 +1,19 @@
 version: "3"
 
 services:
-  fastapi-app:
-    build:
-      context: .
+  hub:
+    image: aihub_server:1.0
     ports:
-      - "8000:8000"
+      - "8001:8000"
     env_file:
-      - tempfiles.env
+      - ./temp_env_files/hub.env
+    depends_on:
+      - db
+  db:
+    image: postgres:16
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./temp_env_files/db.env
+  ctms:
+    image: aihub_ctms:1.0
