@@ -4,8 +4,8 @@ from typing import Union, Annotated
 
 import asyncio
 import os
-from ..ai_services.language_processing import ChatGPT
-from ..schemas.language_processing import ChatGPTSchema
+from ..ai_services.language_processing_services import ChatGPT
+from ..schemas.language_processing_schemas import ChatGPTSchema
 
 
 from ..security.handler import get_current_active_user

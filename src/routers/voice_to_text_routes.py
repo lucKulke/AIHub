@@ -1,5 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Security, Form, Depends
-from ..ai_services.voice_to_text import SpeechRecogniser
+from ..ai_services.voice_to_text_services import SpeechRecogniser
 from ..utilitys import aws, converter
 
 from typing import Annotated
@@ -7,7 +7,7 @@ import re, io, time, os, uuid, asyncio, base64, requests
 
 from ..security.handler import get_current_active_user
 from ..security.security_schemas import User
-from ..schemas.voice_to_text import RunPodSchema
+from ..schemas.voice_to_text_schemas import RunPodSchema
 
 
 router = APIRouter(prefix="/voice_to_text", tags=["Voice to text"])

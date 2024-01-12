@@ -3,8 +3,8 @@ from fastapi.responses import JSONResponse
 import requests
 import os
 from ..utilitys import azure
-from ..schemas.text_to_voice import TextToVoice
-from ..ai_services.text_to_voice import AzureVoice
+from ..schemas.text_to_voice_schemas import TextToVoice
+from ..ai_services.text_to_voice_services import AzureVoice
 from typing import Annotated
 from ..security.handler import get_current_active_user
 from ..security.security_schemas import User
