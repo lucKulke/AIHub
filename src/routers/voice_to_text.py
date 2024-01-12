@@ -56,11 +56,11 @@ async def local_whisper_response(
     return {"whisper_result": response, "file_status": s3_task_result}
 
 
-@router.post("/whisper/runpod/endpoint")
+@router.post("/whisper/runpod_endpoint")
 async def whisper_runpod_endpoint_response(
-    # current_user: Annotated[
-    #     User, Security(get_current_active_user, scopes=["faster_whisper"])
-    # ],
+    current_user: Annotated[
+        User, Security(get_current_active_user, scopes=["runpod_endpoint"])
+    ],
     instructions: RunPodSchema = Depends(),
     timeout: float = 86400.0,
     only_text: bool = True,
