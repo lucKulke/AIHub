@@ -23,7 +23,7 @@ class Dalle:
                 headers=headers,
                 json=payload,
             )
-        except Exception as err:
+        except Exception:
             pass
 
         return json.loads(response.content)["data"][0]["url"]

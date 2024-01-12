@@ -1,27 +1,26 @@
-from fastapi import APIRouter, Depends
-from typing import Union
-from datetime import datetime
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Security
+from typing import Annotated
 import asyncio
 import os
-from ai_services.language_processing import ChatGPT
-from schemas.language_processing import ChatGPTSchema
-from db.database_connection import get_db
-from db import crud
+from ..ai_services.language_processing_services import ChatGPT
+from ..schemas.language_processing_schemas import ChatGPTSchema
+
+from ..security.handler import get_current_active_user
+from ..security.security_schemas import User
 
 router = APIRouter(prefix="/language_processing", tags=["Language processing"])
+chat_gpt = ChatGPT(os.getenv("OPEN_AI_KEY"))
 
 
 @router.post("/chat_gpt")
 async def generate_chat_gpt_response(
-    conversation: ChatGPTSchema, db: Session = Depends(get_db)
+    current_user: Annotated[
+        User, Security(get_current_active_user, scopes=["chat_gpt"])
+    ],
+    conversation: ChatGPTSchema,
 ):
-    api_key = os.getenv("OPEN_AI_KEY")
-
-    # crud.add_application(db, "Test app", 1)
-
     return await chat_gpt_response(
-        ChatGPT(api_key),
+        chat_gpt,
         conversation.model,
         conversation.instances,
         conversation.token,

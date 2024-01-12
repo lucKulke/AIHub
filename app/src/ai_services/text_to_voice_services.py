@@ -1,31 +1,31 @@
 import requests
-from utilitys import azure
 import json
 
 
 class AzureVoice:
-    def __init__(self):
+    def __init__(self, subscription_key, azure_token_url, ctms_url):
         self.speakers = self.list_of_available_speakers()
+        self.subscription_key = subscription_key
+        self.azure_token_url = azure_token_url
+        self.ctms_url = ctms_url
 
-    def set_access_token(self, token):
-        self.access_token = token
-
-    def get_access_token(subscription_key):
-        fetch_token_url = (
-            "https://westeurope.api.cognitive.microsoft.com/sts/v1.0/issueToken"
-        )
-        headers = {"Ocp-Apim-Subscription-Key": subscription_key}
-        response = requests.post(fetch_token_url, headers=headers)
-        return str(response.text)
+    def get_access_token(self):
+        body = {
+            "subscription_key": self.subscription_key,
+            "server_url": self.azure_token_url,
+        }
+        response = requests.post(self.ctms_url, json=body)
+        return response.json().get("access_token")
 
     def generate_voice(self, text, language):
+        access_token = self.get_access_token()
         speaker = self.speakers[language]
 
         headers = {
             "X-Microsoft-OutputFormat": "riff-24khz-16bit-mono-pcm",
             "Content-Type": "application/ssml+xml",
             "Host": "westeurope.tts.speech.microsoft.com",
-            "Authorization": f"Bearer {self.access_token}",
+            "Authorization": f"Bearer {access_token}",
             "User-Agent": "AIHub",
         }
 
@@ -36,18 +36,16 @@ class AzureVoice:
         </voice></speak>
         """
 
-        # Define the URL for the POST request
         url = "https://westeurope.tts.speech.microsoft.com/cognitiveservices/v1"
 
-        # Send the POST request
-        return requests.post(url, headers=headers, data=xml_body)
+        return requests.post(url, headers=headers, data=xml_body.encode("utf-8"))
 
-    def list_of_azure_voices(self, subkey):
-        token = azure.get_access_token(subkey)
+    def list_of_azure_voices(self):
+        access_token = self.get_access_token()
 
         headers = {
             "Host": "westeurope.tts.speech.microsoft.com",
-            "Authorization": f"Bearer {token}",
+            "Authorization": f"Bearer {access_token}",
             "User-Agent": "AIHub",
         }
 
