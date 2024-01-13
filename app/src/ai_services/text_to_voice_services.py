@@ -59,7 +59,11 @@ class AzureVoice:
 
     def list_of_available_speakers(self):
         script_directory = os.path.dirname(os.path.abspath(__file__))
-        languages_json_path = os.path.join(script_directory, "languages.json")
+
+        # Construct the path to 'languages.json' relative to the ai_services folder
+        languages_json_path = os.path.join(
+            script_directory, "..", "..", "languages.json"
+        )
 
         try:
             with open(languages_json_path, "r") as json_file:
