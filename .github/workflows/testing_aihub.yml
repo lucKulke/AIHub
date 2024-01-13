@@ -23,7 +23,7 @@ jobs:
           - 8003:8000
 
     env:
-      DB_USER: testuser
+      DB_USERNAME: testuser
       DB_PASSWORD: testpassword
       DB_TYPE: PostgreSQL
       DB_NAME: testdb
