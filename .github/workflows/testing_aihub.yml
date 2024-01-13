@@ -2,7 +2,7 @@ name: Testing
 run-name: Testing Hub with pytest🧪
 on:
   push:
-    branches: [main, dev]
+    branches: [main]
 
 jobs:
   run_tests:
@@ -45,10 +45,7 @@ jobs:
       AIHUB_ADMIN_PASSWORD: testpassword
       JWT_SECRET: db700dsfg2dd99030bc1e281cfd93422a62231959c2e156d6f7684fbb2392cc0
       JWT_ALGORITHM: HS256
-      JWT_EXPIRATION_TIME:
-        30
-
-        # Add other environment variables if needed
+      JWT_EXPIRATION_TIME: 30
 
     steps:
       - name: Checkout repository
@@ -66,3 +63,22 @@ jobs:
 
       - name: Run tests
         run: pytest ./app/tests/test_main.py
+
+  build_and_push_docker_image:
+    needs: run_tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Docker
+        uses: docker/setup-docker@v2
+
+      - name: Build Docker image
+        run: docker build -t luckulke/aihub_app:latest ./app/
+
+      - name: Log in to DockerHub
+        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push Docker image
+        run: docker push your-dockerhub-username/aihub-app:latest
