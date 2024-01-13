@@ -58,7 +58,7 @@ class AzureVoice:
 
     def list_of_available_speakers(self):
         try:
-            with open("languages.json", "r") as json_file:
+            with open("../languages.json", "r") as json_file:
                 return json.load(json_file)
         except Exception as e:
             raise e
