@@ -2,7 +2,7 @@ name: CI
 run-name: CI (Testing Hub with pytest + linting with flake8)🧪
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
 
 jobs:
   testing:
