@@ -35,7 +35,7 @@ AZURE_VOICE_SUBSCRIPTION_KEY = "Azure voice subscription key for voice generatio
 **Run the API:**
 
 - Start the API server: `uvicorn main:app --reload --port 8001`
-- The API will be available at http://localhost:8000 by default.
+- The API will be available at http://localhost:8000 by default..
 
 **Usage**:
 
