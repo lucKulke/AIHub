@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 
 # Add the parent directory of 'app' to the Python path
-# github actions test
+
 
 client = TestClient(app)
 
