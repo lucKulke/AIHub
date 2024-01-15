@@ -1,5 +1,6 @@
 import requests
 import json
+import os
 
 
 class AzureVoice:
@@ -57,8 +58,15 @@ class AzureVoice:
         return response.content
 
     def list_of_available_speakers(self):
+        script_directory = os.path.dirname(os.path.abspath(__file__))
+
+        # Construct the path to 'languages.json' relative to the ai_services folder
+        languages_json_path = os.path.join(
+            script_directory, "..", "..", "languages.json"
+        )
+
         try:
-            with open("languages.json", "r") as json_file:
+            with open(languages_json_path, "r") as json_file:
                 return json.load(json_file)
         except Exception as e:
             raise e
