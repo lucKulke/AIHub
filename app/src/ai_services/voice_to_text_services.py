@@ -11,7 +11,7 @@ class SpeechRecogniser:
     async def request_severful_whisper(
         self, filename: str, content: BinaryIO, model: str, timeout: float
     ):
-        url = f"{self.server_url}/invocations/upload_file/?model_size={model}"
+        url = f"{self.serverful_url}/invocations/upload_file/?model_size={model}"
 
         files = {"audiofile": (filename, content, "audio/wav")}
 
