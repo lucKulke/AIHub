@@ -43,6 +43,8 @@ jobs:
 
             cd /home/luc/docker_compose_files/
             docker compose down
+            docker rmi aihub_app:latest
+            docker rmi aihub_ctms:latest
             docker compose pull
             docker compose up -d
           EOF
