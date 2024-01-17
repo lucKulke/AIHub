@@ -15,41 +15,31 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Create Environment File
-        run: |
-          echo "AIHUB_ADMIN_USERNAME=${{ secrets.AIHUB_ADMIN_USERNAME }}" >> app.env
-          echo "AIHUB_ADMIN_PASSWORD=${{ secrets.AIHUB_ADMIN_PASSWORD }}" >> app.env
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> app.env
-          echo "JWT_ALGORITHM=${{ secrets.JWT_ALGORITHM }}" >> app.env
-          echo "DB_TYPE=${{ secrets.DB_TYPE }}" >> app.env
-          echo "DB_PORT=${{ secrets.DB_PORT }}" >> app.env
-          echo "DB_HOST=${{ secrets.DB_HOST }}" >> app.env
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> app.env
-          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> app.env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> app.env
-          echo "OPEN_AI_KEY=${{ secrets.OPEN_AI_KEY }}" >> app.env
-          echo "RUNPOD_KEY=${{ secrets.RUNPOD_KEY }}" >> app.env
-          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> app.env
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> app.env
-          echo "AWS_BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }}" >> app.env
-          echo "AWS_BUCKET_REGION=${{ secrets.AWS_BUCKET_REGION }}" >> app.env
-          echo "AZURE_VOICE_SUBSCRIPTION_KEY=${{ secrets.AZURE_VOICE_SUBSCRIPTION_KEY }}" >> app.env
-          echo "AZURE_TOKEN_URL=${{ secrets.AZURE_TOKEN_URL }}" >> app.env
-          echo "CTMS='http://ctms:8004'" >> app.env
-
-      - name: copy file via ssh password
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.IP_SERVER }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.PORT }}
-          source: "app.env"
-          target: /home/luc/env_files/
-
       - name: Deploy to Server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME_SERVER }}@${{ secrets.IP_SERVER }} << 'EOF'
+            cd /home/luc/env_files/
+            rm app.env
+            echo "AIHUB_ADMIN_USERNAME=${{ secrets.AIHUB_ADMIN_USERNAME }}" >> ./app.env
+            echo "AIHUB_ADMIN_PASSWORD=${{ secrets.AIHUB_ADMIN_PASSWORD }}" >> ./app.env
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> ./app.env
+            echo "JWT_ALGORITHM=${{ secrets.JWT_ALGORITHM }}" >> ./app.env
+            echo "DB_TYPE=${{ secrets.DB_TYPE }}" >> ./app.env
+            echo "DB_PORT=${{ secrets.DB_PORT }}" >> ./app.env
+            echo "DB_HOST=${{ secrets.DB_HOST }}" >> ./app.env
+            echo "DB_NAME=${{ secrets.DB_NAME }}" >> ./app.env
+            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> ./app.env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> ./app.env
+            echo "OPEN_AI_KEY=${{ secrets.OPEN_AI_KEY }}" >> ./app.env
+            echo "RUNPOD_KEY=${{ secrets.RUNPOD_KEY }}" >> ./app.env
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> ./app.env
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> ./app.env
+            echo "AWS_BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }}" >> ./app.env
+            echo "AWS_BUCKET_REGION=${{ secrets.AWS_BUCKET_REGION }}" >> ./app.env
+            echo "AZURE_VOICE_SUBSCRIPTION_KEY=${{ secrets.AZURE_VOICE_SUBSCRIPTION_KEY }}" >> ./app.env
+            echo "AZURE_TOKEN_URL=${{ secrets.AZURE_TOKEN_URL }}" >> ./app.env
+            echo "CTMS='http://ctms:8004'" >> ./app.env
+
             cd /home/luc/docker_compose_files/
             docker compose down
             docker compose pull
