@@ -14,7 +14,7 @@ jobs:
 
       - name: Deploy to Server
         run: |
-          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.USERNAME_SERVER }}@${{ secrets.IP_SERVER }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME_SERVER }}@${{ secrets.IP_SERVER }} << 'EOF'
             cd home/luc/docker_compose_files/
             docker-compose down
             docker-compose pull
