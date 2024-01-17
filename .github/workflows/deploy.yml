@@ -7,6 +7,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.2
         with:
@@ -34,8 +37,15 @@ jobs:
           echo "AZURE_TOKEN_URL=${{ secrets.AZURE_TOKEN_URL }}" >> app.env
           echo "CTMS='http://ctms:8004'" >> app.env
 
-      - name: Transfer Environment File
-        run: scp app.env ${{ secrets.USERNAME_SERVER }}@${{ secrets.IP_SERVER }}:/home/luc/env_files/
+      - name: copy file via ssh password
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.IP_SERVER }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          source: "app.env"
+          target: /home/luc/env_files/
 
       - name: Deploy to Server
         run: |
