@@ -24,6 +24,7 @@ jobs:
             echo "AIHUB_ADMIN_PASSWORD=${{ secrets.AIHUB_ADMIN_PASSWORD }}" >> ./app.env
             echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> ./app.env
             echo "JWT_ALGORITHM=${{ secrets.JWT_ALGORITHM }}" >> ./app.env
+            echo "JWT_EXPIRATION_TIME=${{ secrets.JWT_EXPIRATION_TIME }}" >> ./app.env
             echo "DB_TYPE=${{ secrets.DB_TYPE }}" >> ./app.env
             echo "DB_PORT=${{ secrets.DB_PORT }}" >> ./app.env
             echo "DB_HOST=${{ secrets.DB_HOST }}" >> ./app.env
