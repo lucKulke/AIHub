@@ -1,5 +1,5 @@
-name: CD
-run-name: CD (build and push docker image + deploy to server) 🚀
+name: Build and Push
+run-name: CD (build and push docker image) 🔨
 on:
   pull_request:
     branches:
