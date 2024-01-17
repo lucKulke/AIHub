@@ -16,7 +16,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME_SERVER }}@${{ secrets.IP_SERVER }} << 'EOF'
             cd /home/luc/docker_compose_files/
-            docker-compose down
-            docker-compose pull
+            docker compose down
+            docker compose pull
             AIHUB_ADMIN_USERNAME=${{ secrets.AIHUB_ADMIN_USERNAME }} AIHUB_ADMIN_PASSWORD=${{ secrets.AIHUB_ADMIN_PASSWORD }} JWT_SECRET=${{ secrets.JWT_SECRET }} JWT_ALGORITHM=${{ secrets.JWT_ALGORITHM }} JWT_EXPIRATION_TIME=${{ secrets.JWT_EXPIRATION_TIME }} DB_TYPE=${{ secrets.DB_TYPE }} DB_PORT=${{ secrets.DB_PORT }} DB_HOST=${{ secrets.DB_HOST }} DB_NAME=${{ secrets.DB_NAME }} DB_USERNAME=${{ secrets.DB_USERNAME }} DB_PASSWORD=${{ secrets.DB_PASSWORD }} OPEN_AI_KEY=${{ secrets.OPEN_AI_KEY }} RUNPOD_KEY=${{ secrets.RUNPOD_KEY }} AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} AWS_BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }} AWS_BUCKET_REGION=${{ secrets.AWS_BUCKET_REGION }} AZURE_VOICE_SUBSCRIPTION_KEY=${{ secrets.AZURE_VOICE_SUBSCRIPTION_KEY }} AZURE_TOKEN_URL=${{ secrets.AZURE_TOKEN_URL }} CTMS="http://ctms:8004" docker-compose up -d
           EOF
