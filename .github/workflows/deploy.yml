@@ -39,7 +39,8 @@ jobs:
             echo "AWS_BUCKET_REGION=${{ secrets.AWS_BUCKET_REGION }}" >> ./app.env
             echo "AZURE_VOICE_SUBSCRIPTION_KEY=${{ secrets.AZURE_VOICE_SUBSCRIPTION_KEY }}" >> ./app.env
             echo "AZURE_TOKEN_URL=${{ secrets.AZURE_TOKEN_URL }}" >> ./app.env
-            echo "CTMS='http://ctms:8004'" >> ./app.env
+            echo "CTMS=http://ctms:8004" >> ./app.env
+            echo "WHISPER_DOCKERIZED_URL=${{ secrets.WHISPER_DOCKERIZED_URL }}" >> ./app.env
 
             cd /home/luc/docker_compose_files/
             docker compose down
