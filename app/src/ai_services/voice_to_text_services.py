@@ -1,5 +1,5 @@
 from typing import BinaryIO
-from fastapi import HTTPException, status
+
 import httpx
 
 
@@ -24,15 +24,11 @@ class SpeechRecogniser:
                 )
                 response.raise_for_status()
                 json_response = response.json()
-        except httpx.ReadTimeout:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="TimeoutError"
-            )
-        except httpx.HTTPError:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Unable to connect to Whisper",
-            )
+
+        except httpx.ReadTimeout as e:
+            json_response = {"error": f"ReadTimeout {e}"}
+        except httpx.HTTPError as e:
+            json_response = {"error": f"HTTPError: {e}"}
 
         return json_response
 
@@ -64,14 +60,10 @@ class SpeechRecogniser:
 
                 response.raise_for_status()
                 json_response = response.json()
-        except httpx.ReadTimeout:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="TimeoutError"
-            )
-        except httpx.HTTPError:
-            raise HTTPException(
-                status_code=response.status_code,
-                detail=response.text,
-            )
+
+        except httpx.ReadTimeout as e:
+            json_response = {"error": f"ReadTimeout {e}"}
+        except httpx.HTTPError as e:
+            json_response = {"error": f"HTTPError: {e}"}
 
         return json_response
