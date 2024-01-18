@@ -1,4 +1,4 @@
-name: Build and Push
+name: BuildPush
 run-name: CD (build and push docker image) 🔨
 on:
   pull_request:
