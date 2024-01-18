@@ -30,7 +30,6 @@ class SpeechRecogniser:
         except httpx.HTTPError as e:
             json_response = {"error": f"HTTPError: {e}"}
 
-
         return json_response
 
     async def request_runpod_endpoint(
@@ -66,6 +65,5 @@ class SpeechRecogniser:
             json_response = {"error": f"ReadTimeout {e}"}
         except httpx.HTTPError as e:
             json_response = {"error": f"HTTPError: {e}"}
-
 
         return json_response
