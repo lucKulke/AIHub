@@ -1,4 +1,13 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, Security, Depends
+from fastapi import (
+    APIRouter,
+    UploadFile,
+    File,
+    HTTPException,
+    Security,
+    Depends,
+    Response,
+    status,
+)
 from ..ai_services.voice_to_text_services import SpeechRecogniser
 from ..utilitys import aws, converter
 from typing import Annotated
@@ -28,10 +37,12 @@ async def local_whisper_response(
     current_user: Annotated[
         User, Security(get_current_active_user, scopes=["whisper"])
     ],
+    response: Response,
     audiofile: UploadFile = File(...),
     model: str = "small",
     only_text: bool = True,
-    timeout: float = 86400.0,  # 24 hours
+    timeout: float = 86400.0,
+    # 24 hours
 ):
     audiofile_validation(audiofile)
 
@@ -50,13 +61,12 @@ async def local_whisper_response(
         whisper_task, s3_task
     )  # Wait for both tasks to complete
 
-    response = whisper_result
-    text = get_only_text(response)
+    if "error" in whisper_result:
+        response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+    elif only_text:
+        whisper_result = extract_text_from_serverful_response(whisper_result)
 
-    if only_text:
-        response = text
-
-    return {"whisper_result": response, "file_status": s3_task_result}
+    return {"whisper_result": whisper_result, "file_status": s3_task_result}
 
 
 @router.post("/whisper/runpod_endpoint")
@@ -64,6 +74,7 @@ async def whisper_runpod_endpoint_response(
     current_user: Annotated[
         User, Security(get_current_active_user, scopes=["runpod_endpoint"])
     ],
+    response: Response,
     instructions: RunPodSchema = Depends(),
     timeout: float = 86400.0,
     only_text: bool = True,
@@ -84,19 +95,25 @@ async def whisper_runpod_endpoint_response(
 
     runpod_result, s3_result = await asyncio.gather(runpod_task, s3_task)
 
-    if only_text:
-        text = ""
-        for segment in runpod_result["output"]["segments"]:
-            text += segment["text"]
-        runpod_result = text.lstrip()
+    if "error" in runpod_result:
+        response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+    elif only_text:
+        runpod_result = extract_text_from_runpod_endpoint_response(runpod_result)
 
     return {"whisper_result": runpod_result, "file_status": s3_result}
 
 
-def get_only_text(response: dict):
+def extract_text_from_serverful_response(response: dict):
     text = ""
     for segment in response["predictions"]["segments"]:
         text += segment[4]
+    return text.lstrip()
+
+
+def extract_text_from_runpod_endpoint_response(response: dict):
+    text = ""
+    for segment in response["output"]["segments"]:
+        text += segment["text"]
     return text.lstrip()
 
 
