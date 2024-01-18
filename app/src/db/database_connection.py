@@ -9,12 +9,10 @@ db_password = os.getenv("DB_PASSWORD")
 db_host = os.getenv("DB_HOST")
 db_name = os.getenv("DB_NAME")
 db_port = os.getenv("DB_PORT")
-sslmode = ""
-if os.getenv("DB_SSLMODE") is not None:
-    sslmode = "?sslmode=require"
 
-
-SQLALCHEMY_DATABASE_URL = f"{db_type.lower()}://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}{sslmode}"
+SQLALCHEMY_DATABASE_URL = (
+    f"{db_type.lower()}://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}"
+)
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
