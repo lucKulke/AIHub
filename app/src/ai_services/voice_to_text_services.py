@@ -1,4 +1,5 @@
 from typing import BinaryIO
+
 import httpx
 
 
@@ -23,10 +24,12 @@ class SpeechRecogniser:
                 )
                 response.raise_for_status()
                 json_response = response.json()
+
         except httpx.ReadTimeout as e:
             json_response = {"error": f"ReadTimeout {e}"}
         except httpx.HTTPError as e:
             json_response = {"error": f"HTTPError: {e}"}
+
 
         return json_response
 
@@ -58,9 +61,11 @@ class SpeechRecogniser:
 
                 response.raise_for_status()
                 json_response = response.json()
+
         except httpx.ReadTimeout as e:
             json_response = {"error": f"ReadTimeout {e}"}
         except httpx.HTTPError as e:
             json_response = {"error": f"HTTPError: {e}"}
+
 
         return json_response

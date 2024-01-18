@@ -69,6 +69,7 @@ async def local_whisper_response(
     return {"whisper_result": whisper_result, "file_status": s3_task_result}
 
 
+
 @router.post("/whisper/runpod_endpoint")
 async def whisper_runpod_endpoint_response(
     current_user: Annotated[
@@ -95,12 +96,14 @@ async def whisper_runpod_endpoint_response(
 
     runpod_result, s3_result = await asyncio.gather(runpod_task, s3_task)
 
+
     if "error" in runpod_result:
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
     elif only_text:
         runpod_result = extract_text_from_runpod_endpoint_response(runpod_result)
 
     return {"whisper_result": runpod_result, "file_status": s3_result}
+
 
 
 def extract_text_from_serverful_response(response: dict):
