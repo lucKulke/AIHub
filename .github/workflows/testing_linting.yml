@@ -30,7 +30,6 @@ jobs:
       DB_NAME: testdb
       DB_PORT: 5432
       DB_HOST: localhost
-
       OPEN_AI_KEY: ${{secrets.OPEN_AI_KEY}}
       RUNPOD_KEY: ${{secrets.RUNPOD_KEY}}
 
@@ -45,7 +44,7 @@ jobs:
       CTMS: http://localhost:8003
       AIHUB_ADMIN_USERNAME: testadmin
       AIHUB_ADMIN_PASSWORD: testpassword
-      JWT_SECRET: ${{secrets.JWT_TEST_SECRET}}
+      JWT_SECRET: db700dsfg2dd99030bc1e281cfd93422a62231959c2e156d6f7684fbb2392cc0
       JWT_ALGORITHM: HS256
       JWT_EXPIRATION_TIME: 30
 
