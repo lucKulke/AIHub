@@ -13,7 +13,7 @@ client = TestClient(app)
 
 
 def test_azure_available_voices():
-    response = client.get("/text_to_voice/azure/available_voices")
+    response = client.get("/text_to_voice/azure/available_languages")
     assert response.status_code == 200
 
 

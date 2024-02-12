@@ -44,13 +44,13 @@ def generate_azure_voice(
     return Response(content=audio_data, headers=headers)
 
 
-@router.get("/azure/available_voices")
-def azure_voices():
+@router.get("/azure/available_languages")
+def azure_languages():
     return azure_voice.list_of_available_languages()
 
 
-@router.get("/azure/speakers")
-def azure_speakers():
+@router.get("/azure/voices")
+def azure_voices():
     content = azure_voice.list_of_azure_voices()
 
     return Response(
